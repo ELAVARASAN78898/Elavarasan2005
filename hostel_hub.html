@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hostel Hub — Management System</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;color:#1a1a1a}
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* Sidebar */
+.sidebar{width:220px;min-width:220px;background:#fff;border-right:1px solid #e8e8e8;display:flex;flex-direction:column}
+.sidebar-logo{padding:1.25rem 1rem 1rem;border-bottom:1px solid #e8e8e8}
+.logo-badge{display:flex;align-items:center;gap:8px}
+.logo-icon{width:32px;height:32px;background:#185FA5;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px}
+.logo-text{font-size:15px;font-weight:600;color:#1a1a1a}
+.logo-sub{font-size:11px;color:#888}
+.nav{flex:1;padding:0.75rem 0;overflow-y:auto}
+.nav-section{font-size:11px;color:#aaa;padding:0.5rem 1rem 0.25rem;text-transform:uppercase;letter-spacing:0.06em}
+.nav-item{display:flex;align-items:center;gap:10px;padding:0.5rem 1rem;cursor:pointer;color:#555;font-size:13.5px;transition:all 0.15s;border-left:2px solid transparent;user-select:none}
+.nav-item:hover{background:#f0f4f8;color:#1a1a1a}
+.nav-item.active{background:#E6F1FB;color:#185FA5;border-left-color:#185FA5;font-weight:600}
+.nav-item i{font-size:16px;width:18px}
+.notif-dot{width:6px;height:6px;border-radius:50%;background:#E24B4A;margin-left:auto}
+.sidebar-footer{padding:0.75rem 1rem;border-top:1px solid #e8e8e8;font-size:12px;color:#aaa}
+
+/* Main */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 1.5rem;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:600;color:#1a1a1a}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.content{flex:1;overflow-y:auto;padding:1.5rem;background:#f5f5f5}
+.page{display:none}
+.page.active{display:block}
+
+/* Buttons */
+.btn{padding:6px 14px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#1a1a1a;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all 0.15s;font-family:inherit}
+.btn:hover{background:#f5f5f5}
+.btn.primary{background:#185FA5;color:#fff;border-color:#185FA5}
+.btn.primary:hover{background:#0C447C}
+.btn.success-btn{background:#EAF3DE;color:#3B6D11;border-color:#97C459}
+.btn.danger-btn{background:#FCEBEB;color:#A32D2D;border-color:#F09595}
+
+/* Cards & Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:1.5rem}
+.stat-card{background:#ebebeb;border-radius:8px;padding:1rem}
+.stat-label{font-size:12px;color:#666;margin-bottom:4px}
+.stat-value{font-size:24px;font-weight:600;color:#1a1a1a}
+.stat-sub{font-size:11px;color:#999;margin-top:2px}
+.card{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.card-title{font-size:14px;font-weight:600;color:#1a1a1a}
+
+/* Table */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 12px;color:#666;font-weight:500;border-bottom:1px solid #e8e8e8;font-size:12px;background:#fafafa}
+td{padding:10px 12px;border-bottom:1px solid #f0f0f0;color:#1a1a1a;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafafa}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge.success{background:#EAF3DE;color:#3B6D11}
+.badge.warning{background:#FAEEDA;color:#854F0B}
+.badge.danger{background:#FCEBEB;color:#A32D2D}
+.badge.info{background:#E6F1FB;color:#185FA5}
+.badge.gray{background:#f0f0f0;color:#666}
+
+/* Forms */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-group{margin-bottom:12px}
+label{display:block;font-size:12px;color:#666;margin-bottom:4px;font-weight:500}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a;font-size:13px;font-family:inherit;outline:none;transition:border-color 0.15s}
+input:focus,select:focus,textarea:focus{border-color:#185FA5}
+textarea{resize:vertical;min-height:80px}
+
+/* Room grid */
+.room-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:1rem}
+.room-card{border:1px solid #e8e8e8;border-radius:8px;padding:0.75rem;text-align:center;cursor:pointer;transition:all 0.15s}
+.room-card:hover{border-color:#185FA5;transform:translateY(-1px)}
+.room-card.occupied{background:#E6F1FB;border-color:#B5D4F4}
+.room-card.partial{background:#FAEEDA;border-color:#FAC775}
+.room-card.vacant{background:#EAF3DE;border-color:#C0DD97}
+.room-card .room-no{font-size:15px;font-weight:600;color:#1a1a1a}
+.room-card .room-type{font-size:11px;color:#666;margin-top:2px}
+.room-card .room-beds{font-size:11px;margin-top:6px}
+.floor-label{font-size:12px;font-weight:600;color:#666;margin:1rem 0 0.5rem;display:flex;align-items:center;gap:6px}
+
+/* Progress */
+.progress-bar{height:6px;background:#e8e8e8;border-radius:3px;overflow:hidden;margin-top:4px}
+.progress-fill{height:100%;border-radius:3px}
+
+/* Attendance */
+.attendance-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.att-card{border:1px solid #e8e8e8;border-radius:8px;padding:0.75rem;display:flex;align-items:center;gap:10px;background:#fff}
+.att-avatar{width:36px;height:36px;border-radius:50%;background:#E6F1FB;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#185FA5;flex-shrink:0}
+.att-name{font-size:13px;font-weight:500;color:#1a1a1a}
+.att-room{font-size:11px;color:#888}
+.att-toggle{margin-left:auto;width:38px;height:22px;border-radius:11px;border:none;cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0}
+.att-toggle.in{background:#639922}
+.att-toggle.out{background:#ccc}
+.att-toggle::after{content:'';position:absolute;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left 0.2s}
+.att-toggle.in::after{left:19px}
+.att-toggle.out::after{left:3px}
+
+/* Complaints */
+.complaint-item{border:1px solid #e8e8e8;border-radius:8px;padding:0.9rem;margin-bottom:8px;background:#fff}
+.c-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:8px}
+.c-title{font-size:13px;font-weight:600;color:#1a1a1a}
+.c-body{font-size:13px;color:#555;line-height:1.5}
+.c-meta{font-size:11px;color:#aaa;margin-top:6px}
+.c-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+
+/* Timeline */
+.tl-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f0}
+.tl-item:last-child{border-bottom:none}
+.tl-dot{width:8px;height:8px;border-radius:50%;background:#185FA5;margin-top:5px;flex-shrink:0}
+.tl-title{font-size:13px;font-weight:500;color:#1a1a1a}
+.tl-sub{font-size:11px;color:#888;margin-top:2px}
+
+/* Modal */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;z-index:1000}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:12px;border:1px solid #e8e8e8;padding:1.5rem;width:500px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:1.25rem;color:#1a1a1a}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;padding-top:1rem;border-top:1px solid #e8e8e8}
+
+/* Fee summary */
+.fee-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:1rem}
+
+/* Search bar */
+.search-bar{display:flex;align-items:center;gap:8px;margin-bottom:1rem}
+.search-bar input{max-width:280px}
+
+/* Toast */
+#toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#fff;border:1px solid #ddd;border-radius:8px;padding:10px 18px;font-size:13px;opacity:0;transition:opacity 0.25s;z-index:9999;pointer-events:none;box-shadow:0 2px 12px rgba(0,0,0,0.1)}
+
+/* Dashboard two-col */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:700px){
+  .dash-grid{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+  .fee-summary{grid-template-columns:1fr 1fr}
+  .sidebar{width:180px;min-width:180px}
+}
+
+/* Visitor stats */
+.vis-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:1rem}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-badge">
+        <div class="logo-icon"><i class="ti ti-building"></i></div>
+        <div>
+          <div class="logo-text">Hostel Hub</div>
+          <div class="logo-sub">Management System</div>
+        </div>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">Overview</div>
+      <div class="nav-item active" onclick="navigate('dashboard')">
+        <i class="ti ti-layout-dashboard"></i> Dashboard
+      </div>
+      <div class="nav-section">Modules</div>
+      <div class="nav-item" onclick="navigate('students')">
+        <i class="ti ti-users"></i> Students
+      </div>
+      <div class="nav-item" onclick="navigate('rooms')">
+        <i class="ti ti-door"></i> Rooms
+      </div>
+      <div class="nav-item" onclick="navigate('fees')">
+        <i class="ti ti-credit-card"></i> Fees
+        <span class="notif-dot"></span>
+      </div>
+      <div class="nav-item" onclick="navigate('attendance')">
+        <i class="ti ti-calendar-check"></i> Attendance
+      </div>
+      <div class="nav-item" onclick="navigate('complaints')">
+        <i class="ti ti-message-report"></i> Complaints
+        <span class="notif-dot"></span>
+      </div>
+      <div class="nav-item" onclick="navigate('visitors')">
+        <i class="ti ti-id-badge"></i> Visitors
+      </div>
+    </nav>
+    <div class="sidebar-footer">Academic Year 2024–25</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div class="topbar-actions">
+        <button class="btn"><i class="ti ti-bell"></i></button>
+        <div style="display:flex;align-items:center;gap:8px;padding:4px 12px;background:#f0f4f8;border-radius:8px">
+          <div style="width:26px;height:26px;border-radius:50%;background:#185FA5;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:600">AW</div>
+          <span style="font-size:13px;font-weight:500">Admin</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label"><i class="ti ti-users" style="font-size:13px"></i> Total Students</div>
+            <div class="stat-value">148</div>
+            <div class="stat-sub">6 new this month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><i class="ti ti-door" style="font-size:13px"></i> Rooms Occupied</div>
+            <div class="stat-value">38<span style="font-size:14px;font-weight:400;color:#aaa">/50</span></div>
+            <div class="stat-sub">76% occupancy</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><i class="ti ti-credit-card" style="font-size:13px"></i> Fees Due</div>
+            <div class="stat-value" style="color:#A32D2D">₹84,500</div>
+            <div class="stat-sub">12 students pending</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><i class="ti ti-calendar-check" style="font-size:13px"></i> Present Today</div>
+            <div class="stat-value">131</div>
+            <div class="stat-sub">17 on leave / out</div>
+          </div>
+        </div>
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Occupancy by floor</div></div>
+            <div id="occupancy-bars"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Recent activity</div></div>
+            <div id="recent-activity"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Open complaints</div>
+            <button class="btn" onclick="navigate('complaints')">View all</button>
+          </div>
+          <div id="dash-complaints"></div>
+        </div>
+      </div>
+
+      <!-- STUDENTS -->
+      <div class="page" id="page-students">
+        <div class="search-bar">
+          <input type="text" placeholder="Search by name, ID, or room…" id="student-search" oninput="filterStudents()">
+          <button class="btn primary" onclick="openModal('student-modal')"><i class="ti ti-plus"></i> Register student</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Student ID</th><th>Name</th><th>Course</th><th>Room</th><th>Bed</th><th>Admitted</th><th>Status</th><th></th>
+              </tr></thead>
+              <tbody id="student-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROOMS -->
+      <div class="page" id="page-rooms">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+          <div style="display:flex;gap:8px">
+            <span class="badge info"><i class="ti ti-circle-filled" style="font-size:8px"></i> Occupied</span>
+            <span class="badge warning"><i class="ti ti-circle-filled" style="font-size:8px"></i> Partial</span>
+            <span class="badge success"><i class="ti ti-circle-filled" style="font-size:8px"></i> Vacant</span>
+          </div>
+          <button class="btn primary" onclick="openModal('room-alloc-modal')"><i class="ti ti-plus"></i> Allocate room</button>
+        </div>
+        <div id="room-floors"></div>
+      </div>
+
+      <!-- FEES -->
+      <div class="page" id="page-fees">
+        <div class="fee-summary">
+          <div class="stat-card">
+            <div class="stat-label">Collected this month</div>
+            <div class="stat-value" style="color:#3B6D11">₹2,45,000</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Outstanding</div>
+            <div class="stat-value" style="color:#A32D2D">₹84,500</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Students cleared</div>
+            <div class="stat-value">136</div>
+          </div>
+        </div>
+        <div class="search-bar">
+          <input type="text" placeholder="Search student…" id="fee-search" oninput="filterFees()">
+          <button class="btn primary" onclick="openModal('fee-modal')"><i class="ti ti-plus"></i> Record payment</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Student</th><th>Room</th><th>Amount</th><th>Due date</th><th>Paid on</th><th>Status</th><th></th>
+              </tr></thead>
+              <tbody id="fee-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ATTENDANCE -->
+      <div class="page" id="page-attendance">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+          <div style="font-size:13px;color:#666">
+            <i class="ti ti-calendar" style="font-size:14px;vertical-align:-2px"></i>
+            Wednesday, 24 June 2026
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn success-btn" onclick="markAll(true)"><i class="ti ti-check"></i> Mark all In</button>
+            <button class="btn danger-btn" onclick="markAll(false)"><i class="ti ti-x"></i> Mark all Out</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-bottom:1rem">
+          <div class="stat-card" style="flex:1"><div class="stat-label">Present</div><div class="stat-value" id="att-present-count" style="color:#3B6D11">0</div></div>
+          <div class="stat-card" style="flex:1"><div class="stat-label">Absent / Out</div><div class="stat-value" id="att-absent-count" style="color:#A32D2D">0</div></div>
+        </div>
+        <div class="attendance-grid" id="attendance-grid"></div>
+      </div>
+
+      <!-- COMPLAINTS -->
+      <div class="page" id="page-complaints">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn" id="cf-all" onclick="filterComplaints('all','cf-all')">All</button>
+            <button class="btn" id="cf-open" onclick="filterComplaints('open','cf-open')">Open</button>
+            <button class="btn" id="cf-prog" onclick="filterComplaints('in-progress','cf-prog')">In progress</button>
+            <button class="btn" id="cf-res" onclick="filterComplaints('resolved','cf-res')">Resolved</button>
+          </div>
+          <button class="btn primary" onclick="openModal('complaint-modal')"><i class="ti ti-plus"></i> Submit complaint</button>
+        </div>
+        <div id="complaints-list"></div>
+      </div>
+
+      <!-- VISITORS -->
+      <div class="page" id="page-visitors">
+        <div style="display:flex;justify-content:space-between;margin-bottom:1rem;align-items:center">
+          <div style="font-size:13px;color:#666">Visitor log — today</div>
+          <button class="btn primary" onclick="openModal('visitor-modal')"><i class="ti ti-plus"></i> Log visitor</button>
+        </div>
+        <div class="vis-stats">
+          <div class="stat-card"><div class="stat-label">Checked in</div><div class="stat-value" id="vis-in">0</div></div>
+          <div class="stat-card"><div class="stat-label">Checked out</div><div class="stat-value" id="vis-out">0</div></div>
+          <div class="stat-card"><div class="stat-label">Pending approval</div><div class="stat-value" id="vis-pending">0</div></div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Visitor name</th><th>Purpose</th><th>Host student</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Status</th><th></th></tr></thead>
+              <tbody id="visitor-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- MODALS -->
+<div class="modal-overlay" id="student-modal-overlay" onclick="closeModal('student-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title"><i class="ti ti-user-plus" style="color:#185FA5"></i> Register new student</div>
+    <div class="form-row">
+      <div class="form-group"><label>Full name</label><input type="text" id="s-name" placeholder="Arun Kumar"></div>
+      <div class="form-group"><label>Student ID</label><input type="text" id="s-id" placeholder="HS2025001"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Course</label><input type="text" id="s-course" placeholder="B.Tech CSE"></div>
+      <div class="form-group"><label>Year</label><select id="s-year"><option>1st</option><option>2nd</option><option>3rd</option><option>4th</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Phone</label><input type="text" id="s-phone" placeholder="+91 9876543210"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="s-email" placeholder="arun@college.edu"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Room</label><select id="s-room"><option>101</option><option>102</option><option>201</option><option>202</option><option>301</option><option>302</option></select></div>
+      <div class="form-group"><label>Bed</label><select id="s-bed"><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('student-modal')">Cancel</button>
+      <button class="btn primary" onclick="addStudent()">Register student</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="fee-modal-overlay" onclick="closeModal('fee-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title"><i class="ti ti-cash" style="color:#185FA5"></i> Record payment</div>
+    <div class="form-group"><label>Student name / ID</label><input type="text" id="f-student" placeholder="Search student…"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Amount (₹)</label><input type="number" id="f-amount" placeholder="6500"></div>
+      <div class="form-group"><label>Payment type</label><select id="f-type"><option>Hostel fee</option><option>Maintenance</option><option>Mess fee</option><option>Security deposit</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Payment mode</label><select id="f-mode"><option>UPI</option><option>Cash</option><option>Bank transfer</option><option>DD</option></select></div>
+      <div class="form-group"><label>Transaction ID</label><input type="text" id="f-txn" placeholder="TXN123456"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('fee-modal')">Cancel</button>
+      <button class="btn primary" onclick="addPayment()">Record payment</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="complaint-modal-overlay" onclick="closeModal('complaint-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title"><i class="ti ti-message-report" style="color:#185FA5"></i> Submit complaint</div>
+    <div class="form-row">
+      <div class="form-group"><label>Student name</label><input type="text" id="c-name" placeholder="Your name"></div>
+      <div class="form-group"><label>Room</label><input type="text" id="c-room" placeholder="e.g. 204"></div>
+    </div>
+    <div class="form-group"><label>Category</label><select id="c-cat"><option>Maintenance</option><option>Electrical</option><option>Plumbing</option><option>Cleanliness</option><option>Food</option><option>Security</option><option>Other</option></select></div>
+    <div class="form-group"><label>Description</label><textarea id="c-desc" placeholder="Describe the issue…"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('complaint-modal')">Cancel</button>
+      <button class="btn primary" onclick="addComplaint()">Submit complaint</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="visitor-modal-overlay" onclick="closeModal('visitor-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title"><i class="ti ti-id-badge" style="color:#185FA5"></i> Log visitor</div>
+    <div class="form-row">
+      <div class="form-group"><label>Visitor name</label><input type="text" id="v-name" placeholder="Full name"></div>
+      <div class="form-group"><label>Phone</label><input type="text" id="v-phone" placeholder="+91…"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Host student</label><input type="text" id="v-host" placeholder="Student name"></div>
+      <div class="form-group"><label>Room</label><input type="text" id="v-room" placeholder="e.g. 203"></div>
+    </div>
+    <div class="form-group"><label>Purpose of visit</label><input type="text" id="v-purpose" placeholder="Family visit, document delivery…"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('visitor-modal')">Cancel</button>
+      <button class="btn primary" onclick="addVisitor()">Log visitor</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="room-alloc-modal-overlay" onclick="closeModal('room-alloc-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title"><i class="ti ti-door" style="color:#185FA5"></i> Allocate room</div>
+    <div class="form-group"><label>Student ID</label><input type="text" id="ra-sid" placeholder="HS2025001"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Room number</label>
+        <select id="ra-room"><option>101</option><option>102</option><option>103</option><option>201</option><option>202</option><option>301</option><option>302</option></select>
+      </div>
+      <div class="form-group"><label>Bed</label>
+        <select id="ra-bed"><option>A</option><option>B</option><option>C</option><option>D</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('room-alloc-modal')">Cancel</button>
+      <button class="btn primary" onclick="closeModal('room-alloc-modal');showToast('Room allocated successfully','success')">Allocate</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── DATA ──
+const students = [
+  {id:'HS2024001',name:'Arun Kumar',course:'B.Tech CSE',year:'3rd',room:'101',bed:'A',admitted:'2024-06-10',status:'Active'},
+  {id:'HS2024002',name:'Priya Sharma',course:'B.Sc Maths',year:'2nd',room:'101',bed:'B',admitted:'2024-06-11',status:'Active'},
+  {id:'HS2024003',name:'Mohammed Rizwan',course:'B.E Mech',year:'1st',room:'102',bed:'A',admitted:'2024-07-01',status:'Active'},
+  {id:'HS2024004',name:'Divya Lakshmi',course:'MBA',year:'1st',room:'201',bed:'A',admitted:'2024-07-05',status:'Active'},
+  {id:'HS2024005',name:'Karthik Rajan',course:'B.Tech IT',year:'4th',room:'201',bed:'B',admitted:'2023-06-08',status:'Active'},
+  {id:'HS2024006',name:'Sneha Patel',course:'B.Pharm',year:'2nd',room:'202',bed:'A',admitted:'2024-06-15',status:'On leave'},
+  {id:'HS2024007',name:'Arjun Nair',course:'B.Tech CSE',year:'3rd',room:'301',bed:'A',admitted:'2023-06-12',status:'Active'},
+  {id:'HS2024008',name:'Meera Sundaram',course:'M.Tech',year:'1st',room:'302',bed:'B',admitted:'2024-07-10',status:'Active'},
+];
+
+const fees = [
+  {student:'Arun Kumar',id:'HS2024001',room:'101',amount:6500,due:'2024-07-31',paid:'2024-07-20',status:'Paid'},
+  {student:'Priya Sharma',id:'HS2024002',room:'101',amount:6500,due:'2024-07-31',paid:'2024-07-25',status:'Paid'},
+  {student:'Mohammed Rizwan',id:'HS2024003',room:'102',amount:6500,due:'2024-07-31',paid:null,status:'Overdue'},
+  {student:'Divya Lakshmi',id:'HS2024004',room:'201',amount:7000,due:'2024-07-31',paid:'2024-07-18',status:'Paid'},
+  {student:'Karthik Rajan',id:'HS2024005',room:'201',amount:6500,due:'2024-07-31',paid:null,status:'Due'},
+  {student:'Sneha Patel',id:'HS2024006',room:'202',amount:6500,due:'2024-07-31',paid:'2024-07-22',status:'Paid'},
+  {student:'Arjun Nair',id:'HS2024007',room:'301',amount:6000,due:'2024-07-31',paid:null,status:'Overdue'},
+  {student:'Meera Sundaram',id:'HS2024008',room:'302',amount:7000,due:'2024-07-31',paid:'2024-07-28',status:'Paid'},
+];
+
+const rooms = [
+  {no:'101',floor:1,type:'Double',beds:2,occupied:2},{no:'102',floor:1,type:'Double',beds:2,occupied:1},
+  {no:'103',floor:1,type:'Single',beds:1,occupied:0},{no:'104',floor:1,type:'Triple',beds:3,occupied:3},
+  {no:'105',floor:1,type:'Double',beds:2,occupied:0},{no:'106',floor:1,type:'Single',beds:1,occupied:1},
+  {no:'201',floor:2,type:'Double',beds:2,occupied:2},{no:'202',floor:2,type:'Double',beds:2,occupied:1},
+  {no:'203',floor:2,type:'Triple',beds:3,occupied:2},{no:'204',floor:2,type:'Single',beds:1,occupied:0},
+  {no:'205',floor:2,type:'Double',beds:2,occupied:0},{no:'206',floor:2,type:'Triple',beds:3,occupied:3},
+  {no:'301',floor:3,type:'Double',beds:2,occupied:1},{no:'302',floor:3,type:'Double',beds:2,occupied:1},
+  {no:'303',floor:3,type:'Single',beds:1,occupied:0},{no:'304',floor:3,type:'Triple',beds:3,occupied:2},
+  {no:'305',floor:3,type:'Double',beds:2,occupied:2},{no:'306',floor:3,type:'Single',beds:1,occupied:0},
+];
+
+let complaints = [
+  {id:1,student:'Karthik Rajan',room:'201',category:'Electrical',desc:'Tubelight in room not working for 3 days.',date:'2024-07-20',status:'open'},
+  {id:2,student:'Arjun Nair',room:'301',category:'Plumbing',desc:'Tap leaking continuously in bathroom.',date:'2024-07-22',status:'in-progress'},
+  {id:3,student:'Priya Sharma',room:'101',category:'Cleanliness',desc:'Common area not cleaned for 2 days.',date:'2024-07-24',status:'open'},
+  {id:4,student:'Meera Sundaram',room:'302',category:'Maintenance',desc:'Cupboard door hinge broken.',date:'2024-07-15',status:'resolved'},
+];
+
+let visitors = [
+  {id:1,name:'Suresh Kumar',purpose:'Family visit',host:'Arun Kumar',room:'101',checkIn:'09:30',checkOut:'12:45',status:'checked-out'},
+  {id:2,name:'Anitha Sharma',purpose:'Document delivery',host:'Priya Sharma',room:'101',checkIn:'11:00',checkOut:null,status:'checked-in'},
+  {id:3,name:'Ravi Nair',purpose:'Family visit',host:'Arjun Nair',room:'301',checkIn:'14:00',checkOut:null,status:'pending'},
+];
+
+const attState = {};
+students.forEach(s => { attState[s.id] = s.status !== 'On leave'; });
+
+// ── NAVIGATION ──
+function navigate(page) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const navEl = document.querySelector(`[onclick="navigate('${page}')"]`);
+  if (navEl) navEl.classList.add('active');
+  document.getElementById('page-' + page).classList.add('active');
+  const titles = {dashboard:'Dashboard',students:'Student Management',rooms:'Room Management',fees:'Fee Management',attendance:'Attendance Tracking',complaints:'Complaint Management',visitors:'Visitor Management'};
+  document.getElementById('page-title').textContent = titles[page] || page;
+  if (page === 'students') renderStudents();
+  if (page === 'rooms') renderRooms();
+  if (page === 'fees') renderFees();
+  if (page === 'attendance') renderAttendance();
+  if (page === 'complaints') renderComplaints('all');
+  if (page === 'visitors') renderVisitors();
+}
+
+// ── MODAL ──
+function openModal(name) { document.getElementById(name + '-overlay').classList.add('open'); }
+function closeModal(name) { document.getElementById(name + '-overlay').classList.remove('open'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open')); });
+
+// ── TOAST ──
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  const colors = {success:'#3B6D11', danger:'#A32D2D', info:'#185FA5'};
+  t.style.color = colors[type] || colors.info;
+  t.textContent = msg;
+  t.style.opacity = 1;
+  setTimeout(() => { t.style.opacity = 0; }, 2500);
+}
+
+// ── STUDENTS ──
+function renderStudents(filter) {
+  filter = filter || '';
+  const tb = document.getElementById('student-table');
+  const list = students.filter(s => !filter || s.name.toLowerCase().includes(filter) || s.id.toLowerCase().includes(filter) || s.room.includes(filter));
+  tb.innerHTML = list.map(s => `<tr>
+    <td style="font-family:monospace;font-size:12px">${s.id}</td>
+    <td><strong>${s.name}</strong></td>
+    <td>${s.course}</td><td>${s.room}</td><td>${s.bed}</td><td>${s.admitted}</td>
+    <td><span class="badge ${s.status === 'Active' ? 'success' : 'warning'}">${s.status}</span></td>
+    <td><button class="btn" style="padding:4px 8px;font-size:12px" onclick="showToast('Profile opened','info')">View</button></td>
+  </tr>`).join('');
+}
+function filterStudents() { renderStudents(document.getElementById('student-search').value.toLowerCase()); }
+function addStudent() {
+  const name = document.getElementById('s-name').value || 'New Student';
+  const sid = document.getElementById('s-id').value || 'HS2025' + String(students.length + 1).padStart(3, '0');
+  students.push({id:sid,name,course:document.getElementById('s-course').value||'—',year:document.getElementById('s-year').value,room:document.getElementById('s-room').value,bed:document.getElementById('s-bed').value,admitted:new Date().toISOString().split('T')[0],status:'Active'});
+  closeModal('student-modal');
+  renderStudents();
+  showToast('Student registered successfully', 'success');
+}
+
+// ── ROOMS ──
+function renderRooms() {
+  const cont = document.getElementById('room-floors');
+  cont.innerHTML = [1,2,3].map(f => `
+    <div class="floor-label"><i class="ti ti-building" style="font-size:13px"></i> Floor ${f}</div>
+    <div class="room-grid">${rooms.filter(r => r.floor === f).map(r => {
+      const cls = r.occupied === 0 ? 'vacant' : r.occupied === r.beds ? 'occupied' : 'partial';
+      const label = r.occupied === 0 ? 'Vacant' : r.occupied === r.beds ? 'Full' : `${r.beds - r.occupied} free`;
+      const badge = r.occupied === 0 ? 'success' : r.occupied === r.beds ? 'info' : 'warning';
+      return `<div class="room-card ${cls}" onclick="showToast('Room ${r.no}: ${r.occupied}/${r.beds} beds occupied','info')">
+        <div class="room-no">${r.no}</div>
+        <div class="room-type">${r.type}</div>
+        <div class="room-beds"><span class="badge ${badge}" style="font-size:10px;padding:2px 6px">${label}</span></div>
+      </div>`;
+    }).join('')}</div>
+  `).join('');
+}
+
+// ── FEES ──
+function renderFees(filter) {
+  filter = filter || '';
+  const tb = document.getElementById('fee-table');
+  const list = fees.filter(f => !filter || f.student.toLowerCase().includes(filter) || f.id.toLowerCase().includes(filter));
+  tb.innerHTML = list.map((f, idx) => `<tr>
+    <td><strong>${f.student}</strong><br><span style="font-size:11px;color:#aaa">${f.id}</span></td>
+    <td>${f.room}</td>
+    <td>₹${f.amount.toLocaleString('en-IN')}</td>
+    <td>${f.due}</td>
+    <td>${f.paid || '—'}</td>
+    <td><span class="badge ${f.status === 'Paid' ? 'success' : f.status === 'Overdue' ? 'danger' : 'warning'}">${f.status}</span></td>
+    <td>${f.status !== 'Paid' ? `<button class="btn success-btn" style="padding:4px 8px;font-size:12px" onclick="markFeePaid(${fees.indexOf(f)})">Mark paid</button>` : ''}</td>
+  </tr>`).join('');
+}
+function filterFees() { renderFees(document.getElementById('fee-search').value.toLowerCase()); }
+function markFeePaid(idx) { fees[idx].status = 'Paid'; fees[idx].paid = new Date().toISOString().split('T')[0]; renderFees(); showToast('Payment recorded', 'success'); }
+function addPayment() { closeModal('fee-modal'); showToast('Payment recorded successfully', 'success'); }
+
+// ── ATTENDANCE ──
+function renderAttendance() {
+  const grid = document.getElementById('attendance-grid');
+  grid.innerHTML = students.map(s => {
+    const isIn = attState[s.id];
+    const initials = s.name.split(' ').map(w => w[0]).join('').slice(0, 2);
+    return `<div class="att-card">
+      <div class="att-avatar">${initials}</div>
+      <div style="flex:1">
+        <div class="att-name">${s.name}</div>
+        <div class="att-room">Room ${s.room}</div>
+      </div>
+      <button class="att-toggle ${isIn ? 'in' : 'out'}" title="${isIn ? 'Mark out' : 'Mark in'}" onclick="toggleAtt('${s.id}',this)"></button>
+    </div>`;
+  }).join('');
+  updateAttCounts();
+}
+function toggleAtt(id, btn) {
+  attState[id] = !attState[id];
+  btn.classList.toggle('in', attState[id]);
+  btn.classList.toggle('out', !attState[id]);
+  btn.title = attState[id] ? 'Mark out' : 'Mark in';
+  updateAttCounts();
+}
+function updateAttCounts() {
+  const present = Object.values(attState).filter(Boolean).length;
+  document.getElementById('att-present-count').textContent = present;
+  document.getElementById('att-absent-count').textContent = students.length - present;
+}
+function markAll(val) {
+  students.forEach(s => { attState[s.id] = val; });
+  renderAttendance();
+  showToast(val ? 'All marked present' : 'All marked absent', val ? 'success' : 'danger');
+}
+
+// ── COMPLAINTS ──
+function renderComplaints(filter) {
+  const list = document.getElementById('complaints-list');
+  const shown = filter === 'all' ? complaints : complaints.filter(c => c.status === filter);
+  const icons = {Electrical:'bolt',Plumbing:'droplet',Cleanliness:'brush',Food:'soup',Security:'shield',Maintenance:'tool',Other:'alert-circle'};
+  list.innerHTML = shown.map(c => `<div class="complaint-item">
+    <div class="c-header">
+      <div class="c-title"><i class="ti ti-${icons[c.category]||'tool'}" style="font-size:13px;vertical-align:-1px;margin-right:4px"></i>${c.category} — Room ${c.room}</div>
+      <div class="c-actions">
+        <span class="badge ${c.status==='open'?'danger':c.status==='in-progress'?'warning':'success'}">${c.status.replace('-',' ')}</span>
+        ${c.status !== 'resolved' ? `<button class="btn" style="padding:3px 8px;font-size:11px" onclick="resolveComplaint(${c.id})">Resolve</button>` : ''}
+      </div>
+    </div>
+    <div class="c-body">${c.desc}</div>
+    <div class="c-meta">Filed by ${c.student} · ${c.date}</div>
+  </div>`).join('') || '<div style="padding:1.5rem;color:#aaa;font-size:13px;text-align:center">No complaints found.</div>';
+}
+function resolveComplaint(id) {
+  const c = complaints.find(x => x.id === id);
+  if (c) { c.status = 'resolved'; renderComplaints('all'); showToast('Complaint resolved', 'success'); }
+}
+function filterComplaints(f, btnId) {
+  ['cf-all','cf-open','cf-prog','cf-res'].forEach(id => { const el = document.getElementById(id); if(el) el.style.background = ''; });
+  const btn = document.getElementById(btnId);
+  if (btn) btn.style.background = '#f0f0f0';
+  renderComplaints(f);
+}
+function addComplaint() {
+  const name = document.getElementById('c-name').value || 'Anonymous';
+  const room = document.getElementById('c-room').value || '—';
+  const cat = document.getElementById('c-cat').value;
+  const desc = document.getElementById('c-desc').value || 'No description provided.';
+  complaints.unshift({id:Date.now(),student:name,room,category:cat,desc,date:new Date().toISOString().split('T')[0],status:'open'});
+  closeModal('complaint-modal');
+  renderComplaints('all');
+  showToast('Complaint submitted', 'success');
+}
+
+// ── VISITORS ──
+function renderVisitors() {
+  const tb = document.getElementById('visitor-table');
+  tb.innerHTML = visitors.map((v, i) => `<tr>
+    <td><strong>${v.name}</strong></td>
+    <td>${v.purpose}</td><td>${v.host}</td><td>${v.room}</td>
+    <td>${v.checkIn}</td><td>${v.checkOut || '—'}</td>
+    <td><span class="badge ${v.status==='checked-in'?'success':v.status==='pending'?'warning':'gray'}">${v.status.replace('-',' ')}</span></td>
+    <td style="white-space:nowrap">
+      ${v.status==='pending' ? `<button class="btn success-btn" style="padding:4px 8px;font-size:12px" onclick="approveVisitor(${i})">Approve</button>` : ''}
+      ${v.status==='checked-in' ? `<button class="btn" style="padding:4px 8px;font-size:12px" onclick="checkoutVisitor(${i})">Check out</button>` : ''}
+    </td>
+  </tr>`).join('');
+  document.getElementById('vis-in').textContent = visitors.filter(v => v.status === 'checked-in').length;
+  document.getElementById('vis-out').textContent = visitors.filter(v => v.status === 'checked-out').length;
+  document.getElementById('vis-pending').textContent = visitors.filter(v => v.status === 'pending').length;
+}
+function approveVisitor(i) {
+  visitors[i].status = 'checked-in';
+  visitors[i].checkIn = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  renderVisitors(); showToast('Visitor approved and checked in', 'success');
+}
+function checkoutVisitor(i) {
+  visitors[i].status = 'checked-out';
+  visitors[i].checkOut = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  renderVisitors(); showToast('Visitor checked out', 'success');
+}
+function addVisitor() {
+  visitors.unshift({id:Date.now(),name:document.getElementById('v-name').value||'Guest',purpose:document.getElementById('v-purpose').value||'Visit',host:document.getElementById('v-host').value||'—',room:document.getElementById('v-room').value||'—',checkIn:new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}),checkOut:null,status:'pending'});
+  closeModal('visitor-modal'); renderVisitors(); showToast('Visitor logged — pending approval', 'info');
+}
+
+// ── DASHBOARD ──
+function renderDashboard() {
+  const occ = [1,2,3].map(f => {
+    const fr = rooms.filter(r => r.floor === f);
+    const total = fr.reduce((a,r) => a + r.beds, 0);
+    const filled = fr.reduce((a,r) => a + r.occupied, 0);
+    return {label:'Floor '+f, pct:Math.round(filled/total*100), filled, total};
+  });
+  document.getElementById('occupancy-bars').innerHTML = occ.map(o => `
+    <div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#666;margin-bottom:4px">
+        <span>${o.label}</span><span>${o.filled}/${o.total} beds · ${o.pct}%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:${o.pct}%;background:${o.pct>80?'#E24B4A':o.pct>60?'#BA7517':'#185FA5'}"></div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('recent-activity').innerHTML = [
+    {t:'Meera Sundaram checked in',s:'Room 302 · 08:45 AM'},
+    {t:'Fee collected — Divya Lakshmi',s:'₹7,000 via UPI'},
+    {t:'Complaint resolved',s:'Maintenance · Room 302'},
+    {t:'Visitor approved',s:'Anitha Sharma → Room 101'},
+    {t:'New admission',s:'Mohammed Rizwan · Room 102'},
+  ].map(a => `<div class="tl-item"><div class="tl-dot"></div><div><div class="tl-title">${a.t}</div><div class="tl-sub">${a.s}</div></div></div>`).join('');
+
+  document.getElementById('dash-complaints').innerHTML = complaints.filter(c => c.status !== 'resolved').slice(0,3).map(c => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0">
+      <span class="badge ${c.status==='open'?'danger':'warning'}" style="flex-shrink:0">${c.status}</span>
+      <div style="flex:1;font-size:13px">${c.category} — Room ${c.room}</div>
+      <div style="font-size:12px;color:#aaa">${c.date}</div>
+    </div>
+  `).join('') + '<div style="padding-top:8px;font-size:12px;color:#aaa">Click "View all" to manage</div>';
+}
+
+// ── INIT ──
+renderDashboard();
+renderStudents();
+</script>
+</body>
+</html>
