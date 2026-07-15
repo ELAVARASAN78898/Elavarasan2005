@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # HostelHub - Hostel Management System
 
 Full-stack MERN app (MongoDB, Express, React, Node) recreating the demoed HostelHub dashboard.
@@ -49,3 +50,7 @@ The frontend dev server proxies `/api/*` requests to `http://localhost:5000`, so
 - Deleting a student frees their assigned bed automatically.
 - Payment status (Paid/Partial/Pending) is computed server-side from amount vs paid.
 - The Reports page can export a payments CSV directly in the browser.
+=======
+# Elavarasan2005 calculator 
+project
+>>>>>>> 9d20c0b8e5778abc9cea1bf444fc4e2c3d4fcbad
